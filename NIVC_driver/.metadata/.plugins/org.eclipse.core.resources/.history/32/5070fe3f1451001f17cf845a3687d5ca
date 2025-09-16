@@ -1,0 +1,146 @@
+/*
+ * NVIC.c
+ *
+ *  Created on: Jul 30, 2024
+ *      Author: dell
+ */
+#include "NVIC.h"
+#include "tm4c123gh6pm_registers.h"
+
+void NVIC_EnableIRQ(NVIC_IRQType IRQ_Num)
+{
+    //EN0
+    if (IRQ_Num < 32)
+    {
+        NVIC_EN0_REG |= (1 << IRQ_Num);
+    }
+    //EN1
+    else if (IRQ_Num < 64)
+    {
+        NVIC_EN1_REG |= (1 << (IRQ_Num - 32));
+    }
+    //EN2
+    else if (IRQ_Num < 96)
+    {
+        NVIC_EN2_REG |= (1 << (IRQ_Num - 64));
+    }
+    //EN3
+    else if (IRQ_Num < 128)
+    {
+        NVIC_EN3_REG |= (1 << (IRQ_Num - 96));
+    }
+    //EN4
+    else
+    {
+        NVIC_EN4_REG |= (1 << (IRQ_Num - 128));
+    }
+}
+void NVIC_DisableIRQ(NVIC_IRQType IRQ_Num)
+{
+    //DIS0
+    if (IRQ_Num < 32)
+    {
+        NVIC_DIS0_REG |= (1 << IRQ_Num);
+    }
+    //DIS1
+    else if (IRQ_Num < 64)
+    {
+        NVIC_DIS1_REG |= (1 << (IRQ_Num - 32));
+    }
+    //DIS2
+    else if (IRQ_Num < 96)
+    {
+        NVIC_DIS2_REG |= (1 << (IRQ_Num - 64));
+    }
+    //DIS3
+    else if (IRQ_Num < 128)
+    {
+        NVIC_DIS3_REG |= (1 << (IRQ_Num - 96));
+    }
+    //DIS4
+    else
+    {
+        NVIC_DIS4_REG |= (1 << (IRQ_Num - 128));
+    }
+}
+void NVIC_SetPriorityIRQ(NVIC_IRQType IRQ_Num,NVIC_IRQPriorityType IRQ_Priority)
+{
+    uint8 registerIndex = IRQ_Num / 4;
+    uint8 priorityShift = (IRQ_Num % 4) * 8 + 5;
+    volatile uint32 *priorityRegister = (volatile uint32 *)(&NVIC_PRI0_REG + registerIndex);
+
+    *priorityRegister = (*priorityRegister & ~(0x1F << priorityShift)) | (IRQ_Priority << priorityShift);
+}
+void NVIC_EnableException(NVIC_ExceptionType Exception_Num)
+{
+    switch(Exception_Num)
+    {
+        case EXCEPTION_USAGE_FAULT_TYPE:
+            NVIC_SYSTEM_SYSHNDCTRL |= (1<<USAGE_FAULT_ENABLE_BIT_POS);
+            break;
+        case EXCEPTION_BUS_FAULT_TYPE:
+            NVIC_SYSTEM_SYSHNDCTRL |= (1<<BUS_FAULT_ENABLE_BIT_POS);
+            break;
+        case EXCEPTION_MEM_FAULT_TYPE:
+            NVIC_SYSTEM_SYSHNDCTRL |= (1<<MEM_FAULT_ENABLE_BIT_POS);
+        case EXCEPTION_PEND_SV_TYPE:
+            NVIC_SYSTEM_INTCTRL |=(1<<PENDSV_ENABLE_BIT_POS);
+            break;
+        default:
+            break;
+    }
+}
+void NVIC_DisableException(NVIC_ExceptionType Exception_Num)
+{
+    switch(Exception_Num)
+    {
+        case EXCEPTION_USAGE_FAULT_TYPE:
+            NVIC_SYSTEM_SYSHNDCTRL &=~(1<<USAGE_FAULT_ENABLE_BIT_POS);
+            break;
+        case EXCEPTION_BUS_FAULT_TYPE:
+            NVIC_SYSTEM_SYSHNDCTRL &=~(1<<BUS_FAULT_ENABLE_BIT_POS);
+            break;
+        case EXCEPTION_MEM_FAULT_TYPE:
+            NVIC_SYSTEM_SYSHNDCTRL &=~(1<<MEM_FAULT_ENABLE_BIT_POS);
+        case EXCEPTION_DEBUG_MONITOR_TYPE:
+            break;
+        case EXCEPTION_PEND_SV_TYPE:
+            NVIC_SYSTEM_INTCTRL &=~(1<<PENDSV_ENABLE_BIT_POS);
+            break;
+        case EXCEPTION_SVC_TYPE:
+            break;
+        case EXCEPTION_SYSTICK_TYPE:
+            break;
+        default:
+            break;
+    }
+}
+void NVIC_SetPriorityException(NVIC_ExceptionType Exception_Num,NVIC_ExceptionPriorityType Exception_Priority)
+{
+    switch(Exception_Num)
+    {
+        case EXCEPTION_USAGE_FAULT_TYPE:
+            NVIC_SYSTEM_PRI1_REG =(NVIC_SYSTEM_PRI1_REG & 0xFF1FFFFF) | (Exception_Priority<<21);
+            break;
+        case EXCEPTION_BUS_FAULT_TYPE:
+            NVIC_SYSTEM_PRI1_REG =(NVIC_SYSTEM_PRI1_REG & 0xFFFF1FFF) | (Exception_Priority<<13);
+            break;
+        case EXCEPTION_MEM_FAULT_TYPE:
+            NVIC_SYSTEM_PRI1_REG =(NVIC_SYSTEM_PRI1_REG & 0xFFFFFF1F) | (Exception_Priority<<5);
+            break;
+        case EXCEPTION_DEBUG_MONITOR_TYPE:
+            NVIC_SYSTEM_PRI3_REG =(NVIC_SYSTEM_PRI3_REG & 0xFFFFFF1F) | (Exception_Priority<<5);
+            break;
+        case EXCEPTION_PEND_SV_TYPE:
+            NVIC_SYSTEM_PRI3_REG =(NVIC_SYSTEM_PRI3_REG & 0xFF1FFFFF) | (Exception_Priority<<21);
+            break;
+        case EXCEPTION_SYSTICK_TYPE:
+            NVIC_SYSTEM_PRI3_REG =(NVIC_SYSTEM_PRI3_REG & 0x1FFFFFFF) | (Exception_Priority<<29);
+            break;
+        case EXCEPTION_SVC_TYPE:
+            NVIC_SYSTEM_PRI2_REG =(NVIC_SYSTEM_PRI2_REG & 0x1FFFFFFF) | (Exception_Priority<<29);
+            break;
+        default:
+            break;
+    }
+}

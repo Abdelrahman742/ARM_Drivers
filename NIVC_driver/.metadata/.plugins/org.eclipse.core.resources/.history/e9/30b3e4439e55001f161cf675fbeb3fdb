@@ -1,0 +1,758 @@
+/*
+ * NVIC.c
+ *
+ *  Created on: Jul 30, 2024
+ *      Author: dell
+ */
+#include "NVIC.h"
+#include "tm4c123gh6pm_registers.h"
+/*********************************************************************
+* Service Name: NVIC_EnableIRQ
+* Sync/Async: Synchronous
+* Reentrancy: reentrant
+* Parameters (in): IRQ_Num - Number of the IRQ from the target vector table
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: None
+* Description: Function to enable Interrupt request for specific IRQ
+**********************************************************************/
+void NVIC_EnableIRQ(NVIC_IRQType IRQ_Num)
+{
+    //EN0
+    if (IRQ_Num < 32)
+    {
+        NVIC_EN0_REG |= (1 << IRQ_Num);
+    }
+    //EN1
+    else if (IRQ_Num < 64)
+    {
+        NVIC_EN1_REG |= (1 << (IRQ_Num - 32));
+    }
+    //EN2
+    else if (IRQ_Num < 96)
+    {
+        NVIC_EN2_REG |= (1 << (IRQ_Num - 64));
+    }
+    //EN3
+    else if (IRQ_Num < 128)
+    {
+        NVIC_EN3_REG |= (1 << (IRQ_Num - 96));
+    }
+    //EN4
+    else
+    {
+        NVIC_EN4_REG |= (1 << (IRQ_Num - 128));
+    }
+}
+/*********************************************************************
+* Service Name: NVIC_DisableIRQ
+* Sync/Async: Synchronous
+* Reentrancy: reentrant
+* Parameters (in): IRQ_Num - Number of the IRQ from the target vector table
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: None
+* Description: Function to disable Interrupt request for specific IRQ
+**********************************************************************/
+void NVIC_DisableIRQ(NVIC_IRQType IRQ_Num)
+{
+    //DIS0
+    if (IRQ_Num < 32)
+    {
+        NVIC_DIS0_REG |= (1 << IRQ_Num);
+    }
+    //DIS1
+    else if (IRQ_Num < 64)
+    {
+        NVIC_DIS1_REG |= (1 << (IRQ_Num - 32));
+    }
+    //DIS2
+    else if (IRQ_Num < 96)
+    {
+        NVIC_DIS2_REG |= (1 << (IRQ_Num - 64));
+    }
+    //DIS3
+    else if (IRQ_Num < 128)
+    {
+        NVIC_DIS3_REG |= (1 << (IRQ_Num - 96));
+    }
+    //DIS4
+    else
+    {
+        NVIC_DIS4_REG |= (1 << (IRQ_Num - 128));
+    }
+}
+/*********************************************************************
+* Service Name: NVIC_SetPriorityIRQ
+* Sync/Async: Synchronous
+* Reentrancy: reentrant
+* Parameters (in): IRQ_Num - Number of the IRQ from the target vector table,IRQ_Priority -priority for IRQ
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: None
+* Description: Function to make priority for specific IRQ
+**********************************************************************/
+void NVIC_SetPriorityIRQ(NVIC_IRQType IRQ_Num,NVIC_IRQPriorityType IRQ_Priority)
+{
+    /*
+    uint8 registerIndex = IRQ_Num / 4;
+    uint8 priorityShift = (IRQ_Num % 4) * 8 + 5;
+    volatile uint32 *priorityRegister = (volatile uint32 *)(&NVIC_PRI0_REG + registerIndex);
+    *priorityRegister = (*priorityRegister & ~(0x1F << priorityShift)) | (IRQ_Priority << priorityShift);
+    *priorityRegister */
+    if (IRQ_Num == 0)
+         {
+             NVIC_PRI0_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 1)
+         {
+             NVIC_PRI0_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 2)
+         {
+             NVIC_PRI0_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 3)
+         {
+             NVIC_PRI0_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 4)
+         {
+             NVIC_PRI1_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 5)
+         {
+             NVIC_PRI1_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 6)
+         {
+             NVIC_PRI1_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 7)
+         {
+             NVIC_PRI1_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 8)
+         {
+             NVIC_PRI2_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 9)
+         {
+             NVIC_PRI2_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 10)
+         {
+             NVIC_PRI2_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 11)
+         {
+             NVIC_PRI2_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 12)
+         {
+             NVIC_PRI3_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 13)
+         {
+             NVIC_PRI3_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 14)
+         {
+             NVIC_PRI3_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 15)
+         {
+             NVIC_PRI3_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 16)
+         {
+             NVIC_PRI4_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 17)
+         {
+             NVIC_PRI4_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 18)
+         {
+             NVIC_PRI4_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 19)
+         {
+             NVIC_PRI4_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 20)
+         {
+             NVIC_PRI5_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 21)
+         {
+             NVIC_PRI5_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 22)
+         {
+             NVIC_PRI5_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 23)
+         {
+             NVIC_PRI5_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 24)
+         {
+             NVIC_PRI6_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 25)
+         {
+             NVIC_PRI6_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 26)
+         {
+             NVIC_PRI6_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 27)
+         {
+             NVIC_PRI6_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 28)
+         {
+             NVIC_PRI7_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 29)
+         {
+             NVIC_PRI7_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 30)
+         {
+             NVIC_PRI7_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 31)
+         {
+             NVIC_PRI7_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 32)
+         {
+             NVIC_PRI8_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 33)
+         {
+             NVIC_PRI8_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 34)
+         {
+             NVIC_PRI8_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 35)
+         {
+             NVIC_PRI8_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 36)
+         {
+             NVIC_PRI9_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 37)
+         {
+             NVIC_PRI9_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 38)
+         {
+             NVIC_PRI9_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 39)
+         {
+             NVIC_PRI9_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 40)
+         {
+             NVIC_PRI10_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 41)
+         {
+             NVIC_PRI10_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 42)
+         {
+             NVIC_PRI10_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 43)
+         {
+             NVIC_PRI10_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 44)
+         {
+             NVIC_PRI11_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 45)
+         {
+             NVIC_PRI11_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 46)
+         {
+             NVIC_PRI11_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 47)
+         {
+             NVIC_PRI11_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 48)
+         {
+             NVIC_PRI12_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 49)
+         {
+             NVIC_PRI12_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 50)
+         {
+             NVIC_PRI12_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 51)
+         {
+             NVIC_PRI12_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 52)
+         {
+             NVIC_PRI13_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 53)
+         {
+             NVIC_PRI13_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 54)
+         {
+             NVIC_PRI13_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 55)
+         {
+             NVIC_PRI13_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 56)
+         {
+             NVIC_PRI14_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 57)
+         {
+             NVIC_PRI14_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 58)
+         {
+             NVIC_PRI14_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 59)
+         {
+             NVIC_PRI14_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 60)
+         {
+             NVIC_PRI15_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 61)
+         {
+             NVIC_PRI15_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 62)
+         {
+             NVIC_PRI15_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 63)
+         {
+             NVIC_PRI15_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 64)
+         {
+             NVIC_PRI16_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 65)
+         {
+             NVIC_PRI16_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 66)
+         {
+             NVIC_PRI16_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 67)
+         {
+             NVIC_PRI16_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 68)
+         {
+             NVIC_PRI17_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 69)
+         {
+             NVIC_PRI17_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 70)
+         {
+             NVIC_PRI17_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 71)
+         {
+             NVIC_PRI17_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 72)
+         {
+             NVIC_PRI18_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 73)
+         {
+             NVIC_PRI18_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 74)
+         {
+             NVIC_PRI18_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 75)
+         {
+             NVIC_PRI18_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 76)
+         {
+             NVIC_PRI19_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 77)
+         {
+             NVIC_PRI19_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 78)
+         {
+             NVIC_PRI19_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 79)
+         {
+             NVIC_PRI19_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 80)
+         {
+             NVIC_PRI20_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 81)
+         {
+             NVIC_PRI20_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 82)
+         {
+             NVIC_PRI20_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 83)
+         {
+             NVIC_PRI20_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 84)
+         {
+             NVIC_PRI21_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 85)
+         {
+             NVIC_PRI21_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 86)
+         {
+             NVIC_PRI21_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 87)
+         {
+             NVIC_PRI21_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 88)
+         {
+             NVIC_PRI22_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 89)
+         {
+             NVIC_PRI22_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 90)
+         {
+             NVIC_PRI22_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 91)
+         {
+             NVIC_PRI22_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 92)
+         {
+             NVIC_PRI23_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 93)
+         {
+             NVIC_PRI23_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 94)
+         {
+             NVIC_PRI23_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 95)
+         {
+             NVIC_PRI23_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 96)
+         {
+             NVIC_PRI24_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 97)
+         {
+             NVIC_PRI24_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 98)
+         {
+             NVIC_PRI24_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 99)
+         {
+             NVIC_PRI24_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 100)
+         {
+             NVIC_PRI25_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 101)
+         {
+             NVIC_PRI25_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 102)
+         {
+             NVIC_PRI25_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 103)
+         {
+             NVIC_PRI25_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 104)
+         {
+             NVIC_PRI26_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 105)
+         {
+             NVIC_PRI26_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 106)
+         {
+             NVIC_PRI26_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 107)
+         {
+             NVIC_PRI26_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 108)
+         {
+             NVIC_PRI27_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 109)
+         {
+             NVIC_PRI27_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 110)
+         {
+             NVIC_PRI27_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 111)
+         {
+             NVIC_PRI27_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 112)
+         {
+             NVIC_PRI28_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 113)
+         {
+             NVIC_PRI28_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 114)
+         {
+             NVIC_PRI28_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 115)
+         {
+             NVIC_PRI28_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 116)
+         {
+             NVIC_PRI29_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 117)
+         {
+             NVIC_PRI29_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 118)
+         {
+             NVIC_PRI29_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 119)
+         {
+             NVIC_PRI29_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 120)
+         {
+             NVIC_PRI30_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 121)
+         {
+             NVIC_PRI30_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 122)
+         {
+             NVIC_PRI30_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 123)
+         {
+             NVIC_PRI30_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 124)
+         {
+             NVIC_PRI31_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 125)
+         {
+             NVIC_PRI31_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 126)
+         {
+             NVIC_PRI31_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 127)
+         {
+             NVIC_PRI31_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 128)
+         {
+             NVIC_PRI32_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 129)
+         {
+             NVIC_PRI32_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 130)
+         {
+             NVIC_PRI32_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 131)
+         {
+             NVIC_PRI32_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 132)
+         {
+             NVIC_PRI33_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 133)
+         {
+             NVIC_PRI33_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 134)
+         {
+             NVIC_PRI33_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+         else if (IRQ_Num == 135)
+         {
+             NVIC_PRI33_REG = (NVIC_PRI0_REG & 0x1FFFFFFF) | (IRQ_Priority << 29);
+         }
+         else if (IRQ_Num == 136)
+         {
+             NVIC_PRI34_REG = (NVIC_PRI0_REG & 0xFFFFFF1F) | (IRQ_Priority << 5);
+         }
+         else if (IRQ_Num == 137)
+         {
+             NVIC_PRI34_REG = (NVIC_PRI0_REG & 0xFFFF1FFF) | (IRQ_Priority << 13);
+         }
+         else if (IRQ_Num == 138)
+         {
+             NVIC_PRI34_REG = (NVIC_PRI0_REG & 0xFF1FFFFF) | (IRQ_Priority << 21);
+         }
+}
+/*********************************************************************
+* Service Name: NVIC_EnableException
+* Sync/Async: Synchronous
+* Reentrancy: reentrant
+* Parameters (in): Exception_Num - Number of the Exception from the target vector table
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: None
+* Description: Function to enable for specific exception
+**********************************************************************/
+void NVIC_EnableException(NVIC_ExceptionType Exception_Num)
+{
+    if(Exception_Num==EXCEPTION_MEM_FAULT_TYPE) /* Memory Management Fault */
+    {
+        NVIC_SYSTEM_SYSHNDCTRL |= MEM_FAULT_ENABLE_MASK;
+    }
+    else if(Exception_Num==EXCEPTION_BUS_FAULT_TYPE) /* Bus Fault */
+    {
+        NVIC_SYSTEM_SYSHNDCTRL |= BUS_FAULT_ENABLE_MASK;
+    }
+    else if(Exception_Num==EXCEPTION_USAGE_FAULT_TYPE) /* Usage Fault */
+    {
+        NVIC_SYSTEM_SYSHNDCTRL |= USAGE_FAULT_ENABLE_MASK;
+    }
+    else if(Exception_Num==EXCEPTION_PEND_SV_TYPE) /* Pend The PendSV */
+    {
+        NVIC_SYSTEM_INTCTRL |= (1<<28);
+    }
+}
+/*********************************************************************
+* Service Name: NVIC_DisableException
+* Sync/Async: Synchronous
+* Reentrancy: reentrant
+* Parameters (in): Exception_Num - Number of the Exception from the target vector table
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: None
+* Description: Function to disable for specific exception
+**********************************************************************/
+void NVIC_DisableException(NVIC_ExceptionType Exception_Num)
+{
+    if(Exception_Num==EXCEPTION_MEM_FAULT_TYPE) /* Memory Management Fault */
+    {
+        NVIC_SYSTEM_SYSHNDCTRL &= ~MEM_FAULT_ENABLE_MASK;
+    }
+    else if(Exception_Num==EXCEPTION_BUS_FAULT_TYPE) /* Bus Fault */
+    {
+        NVIC_SYSTEM_SYSHNDCTRL &= ~BUS_FAULT_ENABLE_MASK;
+    }
+    else if(Exception_Num==EXCEPTION_USAGE_FAULT_TYPE) /* Usage Fault */
+    {
+        NVIC_SYSTEM_SYSHNDCTRL &= ~USAGE_FAULT_ENABLE_MASK;
+    }
+    else if(Exception_Num==EXCEPTION_PEND_SV_TYPE) /* UnPend The PendSV */
+    {
+        NVIC_SYSTEM_INTCTRL |= (1<<27);
+    }
+}
+/*********************************************************************
+* Service Name: NVIC_SetPriorityIRQ
+* Sync/Async: Synchronous
+* Reentrancy: reentrant
+* Parameters (in): Exception_Num - Number of the exception from the target vector table,Exception_Priority -priority for exception
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: None
+* Description: Function to make priority for specific exception
+**********************************************************************/
+void NVIC_SetPriorityException(NVIC_ExceptionType Exception_Num,NVIC_ExceptionPriorityType Exception_Priority)
+{
+    if(Exception_Num==EXCEPTION_MEM_FAULT_TYPE) /* Memory Management Fault */
+    {
+        NVIC_SYSTEM_PRI1_REG = (NVIC_SYSTEM_PRI1_REG & 0xFFFFFF1F) | (Exception_Priority << MEM_FAULT_PRIORITY_BITS_POS);
+    }
+    else if(Exception_Num==EXCEPTION_BUS_FAULT_TYPE) /* Bus Fault */
+    {
+        NVIC_SYSTEM_PRI1_REG = (NVIC_SYSTEM_PRI1_REG & 0xFFFF1FFF) | (Exception_Priority << BUS_FAULT_PRIORITY_BITS_POS);
+    }
+    else if(Exception_Num==EXCEPTION_USAGE_FAULT_TYPE) /* Usage Fault */
+    {
+        NVIC_SYSTEM_PRI1_REG = (NVIC_SYSTEM_PRI1_REG & 0xFF1FFFFF) | (Exception_Priority << USAGE_FAULT_PRIORITY_BITS_POS);
+    }
+    else if(Exception_Num==EXCEPTION_SVC_TYPE) /* SVC */
+    {
+        NVIC_SYSTEM_PRI2_REG = (NVIC_SYSTEM_PRI2_REG & 0x1FFFFFFF) | (Exception_Priority << SVC_PRIORITY_BITS_POS);
+    }
+    else if(Exception_Num==EXCEPTION_DEBUG_MONITOR_TYPE) /* Debug Monitor */
+    {
+        NVIC_SYSTEM_PRI3_REG = (NVIC_SYSTEM_PRI3_REG & 0xFFFFFF1F) | (Exception_Priority << DEBUG_MONITOR_PRIORITY_BITS_POS);
+    }
+    else if(Exception_Num==EXCEPTION_PEND_SV_TYPE) /* PendSV */
+    {
+        NVIC_SYSTEM_PRI3_REG = (NVIC_SYSTEM_PRI3_REG & 0xFF1FFFFF) | (Exception_Priority << PENDSV_PRIORITY_BITS_POS);
+    }
+    else if(Exception_Num==EXCEPTION_SYSTICK_TYPE) /* SysTick Timer */
+    {
+        NVIC_SYSTEM_PRI3_REG = (NVIC_SYSTEM_PRI3_REG & 0x1FFFFFFF) | (Exception_Priority << SYSTICK_PRIORITY_BITS_POS);
+    }
+}
